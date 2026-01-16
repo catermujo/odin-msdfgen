@@ -1,0 +1,31 @@
+EXPORTS
+    msdfgen_resolveShapeGeometry
+    msdfgen_savePng_r8
+    msdfgen_savePng_rgb8
+    msdfgen_savePng_rgba8
+    msdfgen_savePng_r
+    msdfgen_savePng_rgb
+    msdfgen_savePng_rgba
+    msdfgen_SVG_IMPORT_FAILURE DATA
+    msdfgen_SVG_IMPORT_SUCCESS_FLAG DATA
+    msdfgen_SVG_IMPORT_PARTIAL_FAILURE_FLAG DATA
+    msdfgen_SVG_IMPORT_INCOMPLETE_FLAG DATA
+    msdfgen_SVG_IMPORT_UNSUPPORTED_FEATURE_FLAG DATA
+    msdfgen_SVG_IMPORT_TRANSFORMATION_IGNORED_FLAG DATA
+    msdfgen_buildShapeFromSvgPath
+    msdfgen_loadSvgShape
+    msdfgen_loadSvgShape_skia
+    msdfgen_initializeFreetype
+    msdfgen_deinitializeFreetype
+    msdfgen_loadFont
+    msdfgen_loadFontData
+    msdfgen_destroyFont
+    msdfgen_getFontMetrics
+    msdfgen_getFontWhitespaceWidth
+    msdfgen_getGlyphCount
+    msdfgen_getGlyphIndex
+    msdfgen_loadGlyph
+    msdfgen_loadGlyph_unicode
+    msdfgen_getKerning
+    msdfgen_getKerning_unicode
+	msdfgen_adoptFreetypeFont

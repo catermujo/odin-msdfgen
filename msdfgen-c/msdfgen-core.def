@@ -1,0 +1,22 @@
+EXPORTS
+    msdfgen_GeneratorConfig_default DATA
+    msdfgen_ErrorCorrectionConfig_default DATA
+    msdfgen_MSDFGeneratorConfig_default DATA
+    msdfgen_generateSDF
+    msdfgen_generatePSDF
+    msdfgen_generateMSDF
+    msdfgen_generateMTSDF
+    msdfgen_generateSDF_legacy
+    msdfgen_generatePSDF_legacy
+    msdfgen_generatePseudoSDF_legacy
+    msdfgen_generateMSDF_legacy
+    msdfgen_generateMTSDF_legacy
+    msdfgen_createShape
+    msdfgen_destroyShape
+    msdfgen_normalizeShape
+    msdfgen_setShapeInverseYAxis
+    msdfgen_getShapeBounds
+    msdfgen_shapeOrientContours
+    msdfgen_edgeColoringSimple
+    msdfgen_edgeColoringInkTrap
+    msdfgen_edgeColoringByDistance
