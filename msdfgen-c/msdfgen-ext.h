@@ -44,7 +44,7 @@ extern "C"
 	typedef unsigned msdfgen_unicode_t;
 	typedef struct msdfgen_FreetypeHandle msdfgen_FreetypeHandle;
 	typedef struct msdfgen_FontHandle msdfgen_FontHandle;
-	typedef unsigned msdfgen_GlyphIndex;
+	typedef struct msdfgen_GlyphIndex msdfgen_GlyphIndex;
 
 	/// Global metrics of a typeface (in font units).
 	typedef struct {
@@ -99,13 +99,16 @@ extern "C"
 	bool msdfgen_getFontWhitespaceWidth(double* spaceAdvance, double* tabAdvance, msdfgen_FontHandle* font, msdfgen_FontCoordinateScaling coordinateScaling);
 	/// Outputs the total number of glyphs available in the font.
 	bool msdfgen_getGlyphCount(unsigned* output, msdfgen_FontHandle* font);
+	msdfgen_GlyphIndex *msdfgen_createGlyphIndex();
+	void msdfgen_destroyGlyphIndex(msdfgen_GlyphIndex *glyphIndex);
 	/// Outputs the glyph index corresponding to the specified Unicode character.
 	bool msdfgen_getGlyphIndex(msdfgen_GlyphIndex* glyphIndex, msdfgen_FontHandle* font, msdfgen_unicode_t unicode);
+	unsigned msdfgen_getGlyphIndexIndex(msdfgen_GlyphIndex* glyphIndex);
 	/// Loads the geometry of a glyph from a font file.
-	bool msdfgen_loadGlyph(msdfgen_Shape* output, msdfgen_FontHandle* font, msdfgen_GlyphIndex glyphIndex, msdfgen_FontCoordinateScaling coordinateScaling, double* outAdvance);
+	bool msdfgen_loadGlyph(msdfgen_Shape* output, msdfgen_FontHandle* font, msdfgen_GlyphIndex* glyphIndex, msdfgen_FontCoordinateScaling coordinateScaling, double* outAdvance);
 	bool msdfgen_loadGlyph_unicode(msdfgen_Shape* output, msdfgen_FontHandle* font, msdfgen_unicode_t unicode, msdfgen_FontCoordinateScaling coordinateScaling, double* outAdvance);
 	/// Outputs the kerning distance adjustment between two specific glyphs.
-	bool msdfgen_getKerning(double* output, msdfgen_FontHandle* font, msdfgen_GlyphIndex glyphIndex1, msdfgen_GlyphIndex glyphIndex2, msdfgen_FontCoordinateScaling coordinateScaling);
+	bool msdfgen_getKerning(double* output, msdfgen_FontHandle* font, msdfgen_GlyphIndex* glyphIndex1, msdfgen_GlyphIndex* glyphIndex2, msdfgen_FontCoordinateScaling coordinateScaling);
 	bool msdfgen_getKerning_unicode(double* output, msdfgen_FontHandle* font, msdfgen_unicode_t unicode1, msdfgen_unicode_t unicode2, msdfgen_FontCoordinateScaling coordinateScaling);
 
 #ifdef __cplusplus

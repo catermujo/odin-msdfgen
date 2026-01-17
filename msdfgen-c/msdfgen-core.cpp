@@ -129,6 +129,14 @@ void msdfgen_shapeOrientContours(msdfgen_Shape *shape) {
     ((Shape *)shape)->orientContours();
 }
 
+void msdfgen_shapeBoundMiters(msdfgen_Shape* shape, double* xMin, double* yMin, double* xMax, double* yMax, double border, double miterLimit, int polarity) {
+    ((Shape *)shape)->boundMiters(*xMin, *yMin, *xMax, *yMax, border, miterLimit, polarity);
+}
+
+bool msdfgen_shapeValidate(msdfgen_Shape* shape) {
+	return ((Shape *)shape)->validate();
+}
+
 void msdfgen_edgeColoringSimple(msdfgen_Shape *shape, double angleThreshold,
                                 unsigned long long seed) {
     edgeColoringSimple(PTR_TO_REF(Shape, shape), angleThreshold, seed);

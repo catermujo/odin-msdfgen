@@ -17,6 +17,8 @@ EXPORTS
     msdfgen_setShapeInverseYAxis
     msdfgen_getShapeBounds
     msdfgen_shapeOrientContours
+	msdfgen_shapeBoundMiters
+	msdfgen_shapeValidate
     msdfgen_edgeColoringSimple
     msdfgen_edgeColoringInkTrap
     msdfgen_edgeColoringByDistance

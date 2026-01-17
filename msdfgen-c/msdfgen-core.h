@@ -147,6 +147,10 @@ extern "C"
 	void msdfgen_setShapeInverseYAxis(msdfgen_Shape* shape, bool inverseYAxis);
 	msdfgen_ShapeBounds msdfgen_getShapeBounds(const msdfgen_Shape* shape, double border, double miterLimit, int polarity);
 	void msdfgen_shapeOrientContours(msdfgen_Shape* shape);
+	bool msdfgen_shapeValidate(msdfgen_Shape* shape);
+
+    /// Adjusts the bounding box to fit the shape border's mitered corners.
+    void msdfgen_shapeBoundMiters(msdfgen_Shape* shape, double* xMin, double* yMin, double* xMax, double* yMax, double border, double miterLimit, int polarity);
 
 
 	// edge-coloring.h

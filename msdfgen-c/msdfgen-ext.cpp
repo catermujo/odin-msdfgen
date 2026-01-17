@@ -118,18 +118,27 @@ bool msdfgen_getGlyphCount(unsigned *output, msdfgen_FontHandle *font) {
     return getGlyphCount(*output, (FontHandle *)font);
 }
 
+msdfgen_GlyphIndex *msdfgen_createGlyphIndex() {
+    GlyphIndex *shape = new GlyphIndex();
+    return (msdfgen_GlyphIndex *)shape;
+}
+void msdfgen_destroyGlyphIndex(msdfgen_GlyphIndex *glyphIndex) { delete ((GlyphIndex *)glyphIndex); }
+
 bool msdfgen_getGlyphIndex(msdfgen_GlyphIndex *glyphIndex,
                            msdfgen_FontHandle *font,
                            msdfgen_unicode_t unicode) {
     return getGlyphIndex(PTR_TO_REF(GlyphIndex, glyphIndex), (FontHandle *)font,
                          unicode);
 }
+unsigned msdfgen_getGlyphIndexIndex(msdfgen_GlyphIndex *glyphIndex) {
+    return ((GlyphIndex*)glyphIndex)->getIndex();
+}
 
 bool msdfgen_loadGlyph(msdfgen_Shape *output, msdfgen_FontHandle *font,
-                       msdfgen_GlyphIndex glyphIndex,
+                       msdfgen_GlyphIndex *glyphIndex,
                        msdfgen_FontCoordinateScaling coordinateScaling,
                        double *outAdvance) {
-    return loadGlyph(PTR_TO_REF(Shape, output), (FontHandle *)font, glyphIndex,
+    return loadGlyph(PTR_TO_REF(Shape, output), (FontHandle *)font, PTR_TO_REF(GlyphIndex, glyphIndex),
                      (FontCoordinateScaling)coordinateScaling, outAdvance);
 }
 
@@ -142,10 +151,10 @@ bool msdfgen_loadGlyph_unicode(msdfgen_Shape *output, msdfgen_FontHandle *font,
 }
 
 bool msdfgen_getKerning(double *output, msdfgen_FontHandle *font,
-                        msdfgen_GlyphIndex glyphIndex1,
-                        msdfgen_GlyphIndex glyphIndex2,
+                        msdfgen_GlyphIndex *glyphIndex1,
+                        msdfgen_GlyphIndex *glyphIndex2,
                         msdfgen_FontCoordinateScaling coordinateScaling) {
-    return getKerning(*output, (FontHandle *)font, glyphIndex1, glyphIndex2,
+    return getKerning(*output, (FontHandle *)font, PTR_TO_REF(GlyphIndex, glyphIndex1), PTR_TO_REF(GlyphIndex, glyphIndex2),
                       (FontCoordinateScaling)coordinateScaling);
 }
 

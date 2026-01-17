@@ -161,6 +161,10 @@ foreign msdfgen {
     getShapeBounds :: proc(shape: Shape, border: c.double = 0, miterLimit: c.double = 0, polarity: c.int = 0) -> ShapeBounds ---
     shapeOrientContours :: proc(shape: Shape) ---
 
+    /// Adjusts the bounding box to fit the shape border's mitered corners.
+    shapeBoundMiters :: proc(shape: Shape, xMin, yMin, xMax, yMax: ^c.double, border, miterLimit: c.double, polarity: c.int) ---
+    shapeValidate :: proc(shape: Shape) -> bool ---
+
     // edge-coloring.h
     /** Assigns colors to edges of the shape in accordance to the multi-channel distance field technique.
     *  May split some edges if necessary.
@@ -183,10 +187,10 @@ foreign msdfgen {
 }
 
 // ---Ext---
-unicode_t :: distinct c.uint
+unicode_t :: c.uint
 FreetypeHandle :: distinct rawptr
 FontHandle :: distinct rawptr
-GlyphIndex :: c.uint
+GlyphIndex :: distinct rawptr
 
 /// Global metrics of a typeface (in font units).
 FontMetrics :: struct {
@@ -266,7 +270,7 @@ foreign msdfext {
     loadFont :: proc(library: FreetypeHandle, filename: cstring) -> FontHandle ---
     /// Loads a font from binary data and returns its handle.
     loadFontData :: proc(library: FreetypeHandle, data: [^]u8, length: c.int) -> FontHandle ---
-    adoptFreetypeFont :: proc(ftFace: rawptr) -> ^FontHandle ---
+    adoptFreetypeFont :: proc(ftFace: rawptr) -> FontHandle ---
     /// Unloads a font file.
     destroyFont :: proc(font: FontHandle) ---
 
@@ -276,8 +280,11 @@ foreign msdfext {
     getFontWhitespaceWidth :: proc(spaceAdvance: ^c.double, tabAdvance: ^c.double, font: FontHandle, coordinateScaling: FontCoordinateScaling) -> bool ---
     /// Outputs the total number of glyphs available in the font.
     getGlyphCount :: proc(output: ^c.uint, font: FontHandle) -> bool ---
+    createGlyphIndex :: proc() -> GlyphIndex ---
+    destroyGlyphIndex :: proc(glyph: GlyphIndex) ---
     /// Outputs the glyph index corresponding to the specified Unicode character.
-    getGlyphIndex :: proc(glyphIndex: ^GlyphIndex, font: FontHandle, unicode: unicode_t) -> bool ---
+    getGlyphIndex :: proc(glyphIndex: GlyphIndex, font: FontHandle, unicode: unicode_t) -> bool ---
+    getGlyphIndexIndex :: proc(glyphIndex: GlyphIndex) -> u32 ---
     /// Loads the geometry of a glyph from a font file.
     loadGlyph :: proc(output: Shape, font: FontHandle, glyphIndex: GlyphIndex, coordinateScaling: FontCoordinateScaling, advance: ^c.double = nil) -> bool ---
     loadGlyph_unicode :: proc(output: Shape, font: FontHandle, unicode: unicode_t, coordinateScaling: FontCoordinateScaling, advance: ^c.double = nil) -> bool ---
@@ -285,3 +292,4 @@ foreign msdfext {
     getKerning :: proc(output: ^c.double, font: FontHandle, glyphIndex1: GlyphIndex, glyphIndex2: GlyphIndex, coordinateScaling: FontCoordinateScaling) -> bool ---
     getKerning_unicode :: proc(output: ^c.double, font: FontHandle, unicode1: unicode_t, unicode2: unicode_t, coordinateScaling: FontCoordinateScaling) -> bool ---
 }
+

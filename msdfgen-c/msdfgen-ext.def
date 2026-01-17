@@ -29,3 +29,6 @@ EXPORTS
     msdfgen_getKerning
     msdfgen_getKerning_unicode
 	msdfgen_adoptFreetypeFont
+	msdfgen_getGlyphIndexIndex
+	msdfgen_createGlyphIndex
+	msdfgen_destroyGlyphIndex
