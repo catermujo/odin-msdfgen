@@ -2,6 +2,13 @@
 
 #include "msdfgen-core.h"
 
+#define FT_LOAD_DEFAULT
+typedef struct FT_Outline FT_Outline;
+struct FT_FaceRec_;
+  typedef FT_FaceRec_* FT_Face;
+// typedef void* FT_Face;
+typedef int FT_Error;
+
 #ifdef __cplusplus
 extern "C"
 {

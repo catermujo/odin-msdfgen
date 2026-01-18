@@ -20,7 +20,7 @@ copy /y "%BIN%\msdfgen-config.h" .
 copy /y "%BIN%\Release\*.%DLL_EXT%" ..
 popd
 
-set VCPKG_LIB=%SRC%\%BIN%\vcpkg_installed\x64-windows-static\lib\
+set VCPKG_LIB=%SRC%\%BIN%\vcpkg_installed\x64-windows-static\
 
 REM Static dependencies for linking
 set STATIC_DEPS=brotlicommon.lib brotlidec.lib bz2.lib freetype.lib libpng16.lib tinyxml2.lib zlib.lib skia.lib
@@ -32,7 +32,7 @@ del msdfgen-core.obj msdfgen-core.exp
 REM Build ext DLL with all dependencies
 set EXT_LIBS="%SRC%\%BIN%\Release\msdfgen-core.lib" "%SRC%\%BIN%\Release\msdfgen-ext.lib"
 for %%f in (%STATIC_DEPS%) do (
-    set EXT_LIBS=!EXT_LIBS! "%VCPKG_LIB%%%f"
+    set EXT_LIBS=!EXT_LIBS! "%VCPKG_LIB%\lib\%%f"
 )
 cl /LD /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-ext.cpp !EXT_LIBS! /Fe:ext.%DLL_EXT% /link /IMPLIB:ext_shared.lib /DEF:msdfgen-c\msdfgen-ext.def
 del msdfgen-ext.obj msdfgen-ext.exp
@@ -42,10 +42,12 @@ cl /c /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-core.cpp /Fo:core.obj
 lib /OUT:core.lib "%SRC%\%BIN%\Release\msdfgen-core.lib" core.obj
 del core.obj
 
+set STATIC_DEPS=brotlicommon.lib brotlidec.lib bz2.lib libpng16.lib tinyxml2.lib zlib.lib skia.lib
+
 REM Build ext static lib with all dependencies
 set EXT_STATIC_LIBS="%SRC%\%BIN%\Release\msdfgen-ext.lib"
 for %%f in (%STATIC_DEPS%) do (
-    set EXT_STATIC_LIBS=!EXT_STATIC_LIBS! "%VCPKG_LIB%%%f"
+    set EXT_STATIC_LIBS=!EXT_STATIC_LIBS! "%VCPKG_LIB%\lib\%%f"
 )
 cl /c /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-ext.cpp /Fo:ext.obj
 lib /OUT:ext.lib !EXT_STATIC_LIBS! ext.obj

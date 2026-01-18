@@ -33,13 +33,13 @@ STATIC_DEPS=("${STATIC_DEPS[@]/#/$VCPKG_LIB/lib/}")
 
 echo "Building shared libs..."
 clang++ msdfgen-c/msdfgen-core.cpp -I. "$SRC/$BIN/libmsdfgen-core.a" -shared -fPIC -ocore."$DLL_EXT"
-clang++ msdfgen-c/msdfgen-ext.cpp -I. -I"$VCPKG_LIB/include" "$SRC/$BIN/libmsdfgen-core.a" "$SRC/$BIN/libmsdfgen-ext.a" "${STATIC_DEPS[@]}" -shared -fPIC -oext."$DLL_EXT"
+clang++ msdfgen-c/msdfgen-ext.cpp -I. "$SRC/$BIN/libmsdfgen-core.a" "$SRC/$BIN/libmsdfgen-ext.a" "${STATIC_DEPS[@]}" -shared -fPIC -oext."$DLL_EXT"
 
 echo "Building static libs..."
 clang++ -c msdfgen-c/msdfgen-core.cpp -I. -I"$SRC" -ocore.o
 libtool -static -o core."$LIB_EXT".a "$SRC/$BIN/libmsdfgen-core.a" core.o
 rm core.o
 
-clang++ -c msdfgen-c/msdfgen-ext.cpp -I. -I"$VCPKG_LIB/include" -I"$SRC" -oext.o
+clang++ -c msdfgen-c/msdfgen-ext.cpp -I. -I"$SRC" -oext.o
 libtool -static -o ext."$LIB_EXT".a "$SRC/$BIN/libmsdfgen-ext.a" "${STATIC_DEPS[@]}" ext.o
 rm ext.o

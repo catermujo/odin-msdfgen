@@ -1,6 +1,5 @@
-// #define FT_LOAD_DEFAULT
-#include <ft2build.h>
-#include FT_FREETYPE_H
+// #include <ft2build.h>
+// #include FT_FREETYPE_H
 #include "msdfgen-ext.h"
 #include "utils.h"
 
