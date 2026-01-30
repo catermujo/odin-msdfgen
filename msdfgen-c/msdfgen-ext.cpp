@@ -7,6 +7,7 @@
 
 using namespace msdfgen;
 
+#ifndef MSDFGEN_DISABLE_SVG
 const int msdfgen_SVG_IMPORT_FAILURE = SVG_IMPORT_FAILURE;
 const int msdfgen_SVG_IMPORT_SUCCESS_FLAG = SVG_IMPORT_SUCCESS_FLAG;
 const int msdfgen_SVG_IMPORT_PARTIAL_FAILURE_FLAG =
@@ -16,11 +17,13 @@ const int msdfgen_SVG_IMPORT_UNSUPPORTED_FEATURE_FLAG =
     SVG_IMPORT_UNSUPPORTED_FEATURE_FLAG;
 const int msdfgen_SVG_IMPORT_TRANSFORMATION_IGNORED_FLAG =
     SVG_IMPORT_TRANSFORMATION_IGNORED_FLAG;
+#endif
 
 bool msdfgen_resolveShapeGeometry(msdfgen_Shape *shape) {
     return false; // resolveShapeGeometry(PTR_TO_REF(Shape, shape));
 }
 
+#ifndef MSDFGEN_DISABLE_PNG
 bool msdfgen_savePng_r8(const msdfgen_BitmapConstRefByte *bitmap_r,
                         const char *filename) {
     return savePng(PTR_TO_CONST_BITMAP(unsigned char, 1, bitmap_r), filename);
@@ -51,7 +54,9 @@ bool msdfgen_savePng_rgba(const msdfgen_BitmapConstRef *bitmap_rgba,
                           const char *filename) {
     return savePng(PTR_TO_CONST_BITMAP(float, 4, bitmap_rgba), filename);
 }
+#endif
 
+#ifndef MSDFGEN_DISABLE_SVG
 bool msdfgen_buildShapeFromSvgPath(msdfgen_Shape *shape, const char *pathDef,
                                    double endpointSnapRange) {
     return buildShapeFromSvgPath(PTR_TO_REF(Shape, shape), pathDef,
@@ -70,6 +75,7 @@ int msdfgen_loadSvgShape_skia(msdfgen_Shape *output,
     return loadSvgShape(PTR_TO_REF(Shape, output),
                         PTR_TO_REF(Shape::Bounds, viewBox), filename);
 }
+#endif
 
 msdfgen_FreetypeHandle *msdfgen_initializeFreetype() {
     return (msdfgen_FreetypeHandle *)initializeFreetype();
@@ -91,7 +97,7 @@ msdfgen_FontHandle *msdfgen_loadFontData(msdfgen_FreetypeHandle *library,
                                               length);
 }
 msdfgen_FontHandle *msdfgen_adoptFreetypeFont(FT_Face face) {
-	return (msdfgen_FontHandle *)adoptFreetypeFont(face);
+    return (msdfgen_FontHandle *)adoptFreetypeFont(face);
 }
 
 void msdfgen_destroyFont(msdfgen_FontHandle *font) {
@@ -121,7 +127,9 @@ msdfgen_GlyphIndex *msdfgen_createGlyphIndex() {
     GlyphIndex *shape = new GlyphIndex();
     return (msdfgen_GlyphIndex *)shape;
 }
-void msdfgen_destroyGlyphIndex(msdfgen_GlyphIndex *glyphIndex) { delete ((GlyphIndex *)glyphIndex); }
+void msdfgen_destroyGlyphIndex(msdfgen_GlyphIndex *glyphIndex) {
+    delete ((GlyphIndex *)glyphIndex);
+}
 
 bool msdfgen_getGlyphIndex(msdfgen_GlyphIndex *glyphIndex,
                            msdfgen_FontHandle *font,
@@ -130,14 +138,15 @@ bool msdfgen_getGlyphIndex(msdfgen_GlyphIndex *glyphIndex,
                          unicode);
 }
 unsigned msdfgen_getGlyphIndexIndex(msdfgen_GlyphIndex *glyphIndex) {
-    return ((GlyphIndex*)glyphIndex)->getIndex();
+    return ((GlyphIndex *)glyphIndex)->getIndex();
 }
 
 bool msdfgen_loadGlyph(msdfgen_Shape *output, msdfgen_FontHandle *font,
                        msdfgen_GlyphIndex *glyphIndex,
                        msdfgen_FontCoordinateScaling coordinateScaling,
                        double *outAdvance) {
-    return loadGlyph(PTR_TO_REF(Shape, output), (FontHandle *)font, PTR_TO_REF(GlyphIndex, glyphIndex),
+    return loadGlyph(PTR_TO_REF(Shape, output), (FontHandle *)font,
+                     PTR_TO_REF(GlyphIndex, glyphIndex),
                      (FontCoordinateScaling)coordinateScaling, outAdvance);
 }
 
@@ -153,7 +162,9 @@ bool msdfgen_getKerning(double *output, msdfgen_FontHandle *font,
                         msdfgen_GlyphIndex *glyphIndex1,
                         msdfgen_GlyphIndex *glyphIndex2,
                         msdfgen_FontCoordinateScaling coordinateScaling) {
-    return getKerning(*output, (FontHandle *)font, PTR_TO_REF(GlyphIndex, glyphIndex1), PTR_TO_REF(GlyphIndex, glyphIndex2),
+    return getKerning(*output, (FontHandle *)font,
+                      PTR_TO_REF(GlyphIndex, glyphIndex1),
+                      PTR_TO_REF(GlyphIndex, glyphIndex2),
                       (FontCoordinateScaling)coordinateScaling);
 }
 

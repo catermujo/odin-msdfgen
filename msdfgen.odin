@@ -131,59 +131,116 @@ ShapeBounds :: struct {
     l, b, r, t: c.double,
 }
 
-@(default_calling_convention = "c", link_prefix = "msdfgen_")
-foreign msdfgen {
-    generateSDF :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: GeneratorConfig = Default_GeneratorConfig) ---
+when ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 {
+    @(default_calling_convention = "c", link_prefix = "msdfgen_")
+    foreign _ {
+        generateSDF :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: GeneratorConfig = Default_GeneratorConfig) ---
 
-    /// Generates a single-channel signed pseudo-distance field.
-    generatePSDF :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: GeneratorConfig = Default_GeneratorConfig) ---
+        /// Generates a single-channel signed pseudo-distance field.
+        generatePSDF :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: GeneratorConfig = Default_GeneratorConfig) ---
 
-    /// Generates a multi-channel signed distance field. Edge colors must be assigned first! (See edgeColoringSimple)
-    generateMSDF :: proc(#by_ptr output: BitmapRef(c.float, 3), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: MSDFGeneratorConfig = Default_MSDFGeneratorConfig) ---
+        /// Generates a multi-channel signed distance field. Edge colors must be assigned first! (See edgeColoringSimple)
+        generateMSDF :: proc(#by_ptr output: BitmapRef(c.float, 3), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: MSDFGeneratorConfig = Default_MSDFGeneratorConfig) ---
 
-    /// Generates a multi-channel signed distance field with true distance in the alpha channel. Edge colors must be assigned first.
-    generateMTSDF :: proc(#by_ptr output: BitmapRef(c.float, 4), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: MSDFGeneratorConfig = Default_MSDFGeneratorConfig) ---
+        /// Generates a multi-channel signed distance field with true distance in the alpha channel. Edge colors must be assigned first.
+        generateMTSDF :: proc(#by_ptr output: BitmapRef(c.float, 4), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: MSDFGeneratorConfig = Default_MSDFGeneratorConfig) ---
 
-    // Original simpler versions of the previous functions, which work well under normal circumstances, but cannot deal with overlapping contours.
-    generateSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, range: Range, scale: Vector2, translate: Vector2) ---
-    generatePSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, range: Range, scale: Vector2, translate: Vector2) ---
-    generatePseudoSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, range: Range, scale: Vector2, translate: Vector2) ---
-    generateMSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 3), shape: Shape, range: Range, scale: Vector2, translate: Vector2, #by_ptr errorCorrectionConfig: ErrorCorrectionConfig = Default_ErrorCorrectionConfig) ---
-    generateMTSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 4), shape: Shape, range: Range, scale: Vector2, translate: Vector2, #by_ptr errorCorrectionConfig: ErrorCorrectionConfig = Default_ErrorCorrectionConfig) ---
+        // Original simpler versions of the previous functions, which work well under normal circumstances, but cannot deal with overlapping contours.
+        generateSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, range: Range, scale: Vector2, translate: Vector2) ---
+        generatePSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, range: Range, scale: Vector2, translate: Vector2) ---
+        generatePseudoSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, range: Range, scale: Vector2, translate: Vector2) ---
+        generateMSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 3), shape: Shape, range: Range, scale: Vector2, translate: Vector2, #by_ptr errorCorrectionConfig: ErrorCorrectionConfig = Default_ErrorCorrectionConfig) ---
+        generateMTSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 4), shape: Shape, range: Range, scale: Vector2, translate: Vector2, #by_ptr errorCorrectionConfig: ErrorCorrectionConfig = Default_ErrorCorrectionConfig) ---
 
 
-    // Shape.h
-    createShape :: proc() -> Shape ---
-    destroyShape :: proc(shape: Shape) ---
+        // Shape.h
+        createShape :: proc() -> Shape ---
+        destroyShape :: proc(shape: Shape) ---
 
-    normalizeShape :: proc(shape: Shape) ---
-    setShapeInverseYAxis :: proc(shape: Shape, inverseYAxis: bool) ---
-    getShapeBounds :: proc(shape: Shape, border: c.double = 0, miterLimit: c.double = 0, polarity: c.int = 0) -> ShapeBounds ---
-    shapeOrientContours :: proc(shape: Shape) ---
+        normalizeShape :: proc(shape: Shape) ---
+        setShapeInverseYAxis :: proc(shape: Shape, inverseYAxis: bool) ---
+        getShapeBounds :: proc(shape: Shape, border: c.double = 0, miterLimit: c.double = 0, polarity: c.int = 0) -> ShapeBounds ---
+        shapeOrientContours :: proc(shape: Shape) ---
 
-    /// Adjusts the bounding box to fit the shape border's mitered corners.
-    shapeBoundMiters :: proc(shape: Shape, xMin, yMin, xMax, yMax: ^c.double, border, miterLimit: c.double, polarity: c.int) ---
-    shapeValidate :: proc(shape: Shape) -> bool ---
+        /// Adjusts the bounding box to fit the shape border's mitered corners.
+        shapeBoundMiters :: proc(shape: Shape, xMin, yMin, xMax, yMax: ^c.double, border, miterLimit: c.double, polarity: c.int) ---
+        shapeValidate :: proc(shape: Shape) -> bool ---
 
-    // edge-coloring.h
-    /** Assigns colors to edges of the shape in accordance to the multi-channel distance field technique.
+        // edge-coloring.h
+        /** Assigns colors to edges of the shape in accordance to the multi-channel distance field technique.
     *  May split some edges if necessary.
     *  angleThreshold specifies the maximum angle (in radians) to be considered a corner, for example 3 (~172 degrees).
     *  Values below 1/2 PI will be treated as the external angle.
     */
-    edgeColoringSimple :: proc(shape: Shape, angleThreshold: c.double, seed: c.ulonglong = 0) ---
+        edgeColoringSimple :: proc(shape: Shape, angleThreshold: c.double, seed: c.ulonglong = 0) ---
 
-    /** The alternative "ink trap" coloring strategy is designed for better results with typefaces
+        /** The alternative "ink trap" coloring strategy is designed for better results with typefaces
     *  that use ink traps as a design feature. It guarantees that even if all edges that are shorter than
     *  both their neighboring edges are removed, the coloring remains consistent with the established rules.
     */
-    edgeColoringInkTrap :: proc(shape: Shape, angleThreshold: c.double, seed: c.ulonglong = 0) ---
+        edgeColoringInkTrap :: proc(shape: Shape, angleThreshold: c.double, seed: c.ulonglong = 0) ---
 
-    /** The alternative coloring by distance tries to use different colors for edges that are close together.
+        /** The alternative coloring by distance tries to use different colors for edges that are close together.
     *  This should theoretically be the best strategy on average. However, since it needs to compute the distance
     *  between all pairs of edges, and perform a graph optimization task, it is much slower than the rest.
     */
-    edgeColoringByDistance :: proc(shape: Shape, angleThreshold: c.double, seed: c.ulonglong = 0) ---
+        edgeColoringByDistance :: proc(shape: Shape, angleThreshold: c.double, seed: c.ulonglong = 0) ---
+    }
+} else {
+    @(default_calling_convention = "c", link_prefix = "msdfgen_")
+    foreign msdfgen {
+        generateSDF :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: GeneratorConfig = Default_GeneratorConfig) ---
+
+        /// Generates a single-channel signed pseudo-distance field.
+        generatePSDF :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: GeneratorConfig = Default_GeneratorConfig) ---
+
+        /// Generates a multi-channel signed distance field. Edge colors must be assigned first! (See edgeColoringSimple)
+        generateMSDF :: proc(#by_ptr output: BitmapRef(c.float, 3), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: MSDFGeneratorConfig = Default_MSDFGeneratorConfig) ---
+
+        /// Generates a multi-channel signed distance field with true distance in the alpha channel. Edge colors must be assigned first.
+        generateMTSDF :: proc(#by_ptr output: BitmapRef(c.float, 4), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: MSDFGeneratorConfig = Default_MSDFGeneratorConfig) ---
+
+        // Original simpler versions of the previous functions, which work well under normal circumstances, but cannot deal with overlapping contours.
+        generateSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, range: Range, scale: Vector2, translate: Vector2) ---
+        generatePSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, range: Range, scale: Vector2, translate: Vector2) ---
+        generatePseudoSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, range: Range, scale: Vector2, translate: Vector2) ---
+        generateMSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 3), shape: Shape, range: Range, scale: Vector2, translate: Vector2, #by_ptr errorCorrectionConfig: ErrorCorrectionConfig = Default_ErrorCorrectionConfig) ---
+        generateMTSDF_legacy :: proc(#by_ptr output: BitmapRef(c.float, 4), shape: Shape, range: Range, scale: Vector2, translate: Vector2, #by_ptr errorCorrectionConfig: ErrorCorrectionConfig = Default_ErrorCorrectionConfig) ---
+
+
+        // Shape.h
+        createShape :: proc() -> Shape ---
+        destroyShape :: proc(shape: Shape) ---
+
+        normalizeShape :: proc(shape: Shape) ---
+        setShapeInverseYAxis :: proc(shape: Shape, inverseYAxis: bool) ---
+        getShapeBounds :: proc(shape: Shape, border: c.double = 0, miterLimit: c.double = 0, polarity: c.int = 0) -> ShapeBounds ---
+        shapeOrientContours :: proc(shape: Shape) ---
+
+        /// Adjusts the bounding box to fit the shape border's mitered corners.
+        shapeBoundMiters :: proc(shape: Shape, xMin, yMin, xMax, yMax: ^c.double, border, miterLimit: c.double, polarity: c.int) ---
+        shapeValidate :: proc(shape: Shape) -> bool ---
+
+        // edge-coloring.h
+        /** Assigns colors to edges of the shape in accordance to the multi-channel distance field technique.
+    *  May split some edges if necessary.
+    *  angleThreshold specifies the maximum angle (in radians) to be considered a corner, for example 3 (~172 degrees).
+    *  Values below 1/2 PI will be treated as the external angle.
+    */
+        edgeColoringSimple :: proc(shape: Shape, angleThreshold: c.double, seed: c.ulonglong = 0) ---
+
+        /** The alternative "ink trap" coloring strategy is designed for better results with typefaces
+    *  that use ink traps as a design feature. It guarantees that even if all edges that are shorter than
+    *  both their neighboring edges are removed, the coloring remains consistent with the established rules.
+    */
+        edgeColoringInkTrap :: proc(shape: Shape, angleThreshold: c.double, seed: c.ulonglong = 0) ---
+
+        /** The alternative coloring by distance tries to use different colors for edges that are close together.
+    *  This should theoretically be the best strategy on average. However, since it needs to compute the distance
+    *  between all pairs of edges, and perform a graph optimization task, it is much slower than the rest.
+    */
+        edgeColoringByDistance :: proc(shape: Shape, angleThreshold: c.double, seed: c.ulonglong = 0) ---
+    }
 }
 
 // ---Ext---
@@ -227,69 +284,137 @@ FontCoordinateScaling :: enum c.int {
     legacy,
 }
 
-@(default_calling_convention = "c", link_prefix = "msdfgen_")
-foreign msdfext {
+when ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 {
+    @(default_calling_convention = "c", link_prefix = "msdfgen_")
+    foreign _ {
 
-    // resolve-shape-geometry.h
-    /// Resolves any intersections within the shape by subdividing its contours using the Skia library and makes sure its contours have a consistent winding.
-    resolveShapeGeometry :: proc(shape: Shape) -> bool ---
+        // resolve-shape-geometry.h
+        /// Resolves any intersections within the shape by subdividing its contours using the Skia library and makes sure its contours have a consistent winding.
+        resolveShapeGeometry :: proc(shape: Shape) -> bool ---
 
-    // save-png.h
-    /// Saves the bitmap as a PNG file.
-    savePng_r8 :: proc(#by_ptr bitmap: BitmapRef(u8, 1), filename: cstring) ---
-    savePng_rgb8 :: proc(#by_ptr bitmap: BitmapRef(u8, 3), filename: cstring) ---
-    savePng_rgba8 :: proc(#by_ptr bitmap: BitmapRef(u8, 4), filename: cstring) ---
-    savePng_r :: proc(#by_ptr bitmap: BitmapRef(c.float, 1), filename: cstring) ---
-    savePng_rgb :: proc(#by_ptr bitmap: BitmapRef(c.float, 3), filename: cstring) ---
-    savePng_rgba :: proc(#by_ptr bitmap: BitmapRef(c.float, 4), filename: cstring) ---
+        // save-png.h
+        /// Saves the bitmap as a PNG file.
+        savePng_r8 :: proc(#by_ptr bitmap: BitmapRef(u8, 1), filename: cstring) ---
+        savePng_rgb8 :: proc(#by_ptr bitmap: BitmapRef(u8, 3), filename: cstring) ---
+        savePng_rgba8 :: proc(#by_ptr bitmap: BitmapRef(u8, 4), filename: cstring) ---
+        savePng_r :: proc(#by_ptr bitmap: BitmapRef(c.float, 1), filename: cstring) ---
+        savePng_rgb :: proc(#by_ptr bitmap: BitmapRef(c.float, 3), filename: cstring) ---
+        savePng_rgba :: proc(#by_ptr bitmap: BitmapRef(c.float, 4), filename: cstring) ---
 
-    // import-svg.h
-    SVG_IMPORT_FAILURE: c.int
-    SVG_IMPORT_SUCCESS_FLAG: c.int
-    SVG_IMPORT_PARTIAL_FAILURE_FLAG: c.int
-    SVG_IMPORT_INCOMPLETE_FLAG: c.int
-    SVG_IMPORT_UNSUPPORTED_FEATURE_FLAG: c.int
-    SVG_IMPORT_TRANSFORMATION_IGNORED_FLAG: c.int
+        // import-svg.h
+        SVG_IMPORT_FAILURE: c.int
+        SVG_IMPORT_SUCCESS_FLAG: c.int
+        SVG_IMPORT_PARTIAL_FAILURE_FLAG: c.int
+        SVG_IMPORT_INCOMPLETE_FLAG: c.int
+        SVG_IMPORT_UNSUPPORTED_FEATURE_FLAG: c.int
+        SVG_IMPORT_TRANSFORMATION_IGNORED_FLAG: c.int
 
-    /// Builds a shape from an SVG path string
-    buildShapeFromSvgPath :: proc(shape: Shape, pathDef: cstring, endpointSnapRange: c.double) -> bool ---
+        /// Builds a shape from an SVG path string
+        buildShapeFromSvgPath :: proc(shape: Shape, pathDef: cstring, endpointSnapRange: c.double) -> bool ---
 
-    /// Reads a single <path> element found in the specified SVG file and converts it to output Shape
-    loadSvgShape :: proc(output: Shape, filename: cstring, pathIndex: c.int, dimensions: ^Vector2) -> bool ---
+        /// Reads a single <path> element found in the specified SVG file and converts it to output Shape
+        loadSvgShape :: proc(output: Shape, filename: cstring, pathIndex: c.int, dimensions: ^Vector2) -> bool ---
 
-    /// New version - if Skia is available, reads the entire geometry of the SVG file into the output Shape, otherwise may only read one path, returns SVG import flags
-    loadSvgShape_skia :: proc(output: Shape, viewBox: ^ShapeBounds, filename: cstring) -> c.int ---
+        /// New version - if Skia is available, reads the entire geometry of the SVG file into the output Shape, otherwise may only read one path, returns SVG import flags
+        loadSvgShape_skia :: proc(output: Shape, viewBox: ^ShapeBounds, filename: cstring) -> c.int ---
 
-    // import-font.h
-    /// Initializes the FreeType library.
-    initializeFreetype :: proc() -> FreetypeHandle ---
-    /// Deinitializes the FreeType library.
-    deinitializeFreetype :: proc(library: FreetypeHandle) ---
+        // import-font.h
+        /// Initializes the FreeType library.
+        initializeFreetype :: proc() -> FreetypeHandle ---
+        /// Deinitializes the FreeType library.
+        deinitializeFreetype :: proc(library: FreetypeHandle) ---
 
-    /// Loads a font file and returns its handle.
-    loadFont :: proc(library: FreetypeHandle, filename: cstring) -> FontHandle ---
-    /// Loads a font from binary data and returns its handle.
-    loadFontData :: proc(library: FreetypeHandle, data: [^]u8, length: c.int) -> FontHandle ---
-    adoptFreetypeFont :: proc(ftFace: rawptr) -> FontHandle ---
-    /// Unloads a font file.
-    destroyFont :: proc(font: FontHandle) ---
+        /// Loads a font file and returns its handle.
+        loadFont :: proc(library: FreetypeHandle, filename: cstring) -> FontHandle ---
+        /// Loads a font from binary data and returns its handle.
+        loadFontData :: proc(library: FreetypeHandle, data: [^]u8, length: c.int) -> FontHandle ---
+        adoptFreetypeFont :: proc(ftFace: rawptr) -> FontHandle ---
+        /// Unloads a font file.
+        destroyFont :: proc(font: FontHandle) ---
 
-    /// Outputs the metrics of a font file.
-    getFontMetrics :: proc(metrics: ^FontMetrics, font: FontHandle, coordinateScaling: FontCoordinateScaling) -> bool ---
-    /// Outputs the width of the space and tab characters.
-    getFontWhitespaceWidth :: proc(spaceAdvance: ^c.double, tabAdvance: ^c.double, font: FontHandle, coordinateScaling: FontCoordinateScaling) -> bool ---
-    /// Outputs the total number of glyphs available in the font.
-    getGlyphCount :: proc(output: ^c.uint, font: FontHandle) -> bool ---
-    createGlyphIndex :: proc() -> GlyphIndex ---
-    destroyGlyphIndex :: proc(glyph: GlyphIndex) ---
-    /// Outputs the glyph index corresponding to the specified Unicode character.
-    getGlyphIndex :: proc(glyphIndex: GlyphIndex, font: FontHandle, unicode: unicode_t) -> bool ---
-    getGlyphIndexIndex :: proc(glyphIndex: GlyphIndex) -> u32 ---
-    /// Loads the geometry of a glyph from a font file.
-    loadGlyph :: proc(output: Shape, font: FontHandle, glyphIndex: GlyphIndex, coordinateScaling: FontCoordinateScaling, advance: ^c.double = nil) -> bool ---
-    loadGlyph_unicode :: proc(output: Shape, font: FontHandle, unicode: unicode_t, coordinateScaling: FontCoordinateScaling, advance: ^c.double = nil) -> bool ---
-    /// Outputs the kerning distance adjustment between two specific glyphs.
-    getKerning :: proc(output: ^c.double, font: FontHandle, glyphIndex1: GlyphIndex, glyphIndex2: GlyphIndex, coordinateScaling: FontCoordinateScaling) -> bool ---
-    getKerning_unicode :: proc(output: ^c.double, font: FontHandle, unicode1: unicode_t, unicode2: unicode_t, coordinateScaling: FontCoordinateScaling) -> bool ---
+        /// Outputs the metrics of a font file.
+        getFontMetrics :: proc(metrics: ^FontMetrics, font: FontHandle, coordinateScaling: FontCoordinateScaling) -> bool ---
+        /// Outputs the width of the space and tab characters.
+        getFontWhitespaceWidth :: proc(spaceAdvance: ^c.double, tabAdvance: ^c.double, font: FontHandle, coordinateScaling: FontCoordinateScaling) -> bool ---
+        /// Outputs the total number of glyphs available in the font.
+        getGlyphCount :: proc(output: ^c.uint, font: FontHandle) -> bool ---
+        createGlyphIndex :: proc() -> GlyphIndex ---
+        destroyGlyphIndex :: proc(glyph: GlyphIndex) ---
+        /// Outputs the glyph index corresponding to the specified Unicode character.
+        getGlyphIndex :: proc(glyphIndex: GlyphIndex, font: FontHandle, unicode: unicode_t) -> bool ---
+        getGlyphIndexIndex :: proc(glyphIndex: GlyphIndex) -> u32 ---
+        /// Loads the geometry of a glyph from a font file.
+        loadGlyph :: proc(output: Shape, font: FontHandle, glyphIndex: GlyphIndex, coordinateScaling: FontCoordinateScaling, advance: ^c.double = nil) -> bool ---
+        loadGlyph_unicode :: proc(output: Shape, font: FontHandle, unicode: unicode_t, coordinateScaling: FontCoordinateScaling, advance: ^c.double = nil) -> bool ---
+        /// Outputs the kerning distance adjustment between two specific glyphs.
+        getKerning :: proc(output: ^c.double, font: FontHandle, glyphIndex1: GlyphIndex, glyphIndex2: GlyphIndex, coordinateScaling: FontCoordinateScaling) -> bool ---
+        getKerning_unicode :: proc(output: ^c.double, font: FontHandle, unicode1: unicode_t, unicode2: unicode_t, coordinateScaling: FontCoordinateScaling) -> bool ---
+    }
+} else {
+    @(default_calling_convention = "c", link_prefix = "msdfgen_")
+    foreign msdfext {
+
+        // resolve-shape-geometry.h
+        /// Resolves any intersections within the shape by subdividing its contours using the Skia library and makes sure its contours have a consistent winding.
+        resolveShapeGeometry :: proc(shape: Shape) -> bool ---
+
+        // save-png.h
+        /// Saves the bitmap as a PNG file.
+        savePng_r8 :: proc(#by_ptr bitmap: BitmapRef(u8, 1), filename: cstring) ---
+        savePng_rgb8 :: proc(#by_ptr bitmap: BitmapRef(u8, 3), filename: cstring) ---
+        savePng_rgba8 :: proc(#by_ptr bitmap: BitmapRef(u8, 4), filename: cstring) ---
+        savePng_r :: proc(#by_ptr bitmap: BitmapRef(c.float, 1), filename: cstring) ---
+        savePng_rgb :: proc(#by_ptr bitmap: BitmapRef(c.float, 3), filename: cstring) ---
+        savePng_rgba :: proc(#by_ptr bitmap: BitmapRef(c.float, 4), filename: cstring) ---
+
+        // import-svg.h
+        SVG_IMPORT_FAILURE: c.int
+        SVG_IMPORT_SUCCESS_FLAG: c.int
+        SVG_IMPORT_PARTIAL_FAILURE_FLAG: c.int
+        SVG_IMPORT_INCOMPLETE_FLAG: c.int
+        SVG_IMPORT_UNSUPPORTED_FEATURE_FLAG: c.int
+        SVG_IMPORT_TRANSFORMATION_IGNORED_FLAG: c.int
+
+        /// Builds a shape from an SVG path string
+        buildShapeFromSvgPath :: proc(shape: Shape, pathDef: cstring, endpointSnapRange: c.double) -> bool ---
+
+        /// Reads a single <path> element found in the specified SVG file and converts it to output Shape
+        loadSvgShape :: proc(output: Shape, filename: cstring, pathIndex: c.int, dimensions: ^Vector2) -> bool ---
+
+        /// New version - if Skia is available, reads the entire geometry of the SVG file into the output Shape, otherwise may only read one path, returns SVG import flags
+        loadSvgShape_skia :: proc(output: Shape, viewBox: ^ShapeBounds, filename: cstring) -> c.int ---
+
+        // import-font.h
+        /// Initializes the FreeType library.
+        initializeFreetype :: proc() -> FreetypeHandle ---
+        /// Deinitializes the FreeType library.
+        deinitializeFreetype :: proc(library: FreetypeHandle) ---
+
+        /// Loads a font file and returns its handle.
+        loadFont :: proc(library: FreetypeHandle, filename: cstring) -> FontHandle ---
+        /// Loads a font from binary data and returns its handle.
+        loadFontData :: proc(library: FreetypeHandle, data: [^]u8, length: c.int) -> FontHandle ---
+        adoptFreetypeFont :: proc(ftFace: rawptr) -> FontHandle ---
+        /// Unloads a font file.
+        destroyFont :: proc(font: FontHandle) ---
+
+        /// Outputs the metrics of a font file.
+        getFontMetrics :: proc(metrics: ^FontMetrics, font: FontHandle, coordinateScaling: FontCoordinateScaling) -> bool ---
+        /// Outputs the width of the space and tab characters.
+        getFontWhitespaceWidth :: proc(spaceAdvance: ^c.double, tabAdvance: ^c.double, font: FontHandle, coordinateScaling: FontCoordinateScaling) -> bool ---
+        /// Outputs the total number of glyphs available in the font.
+        getGlyphCount :: proc(output: ^c.uint, font: FontHandle) -> bool ---
+        createGlyphIndex :: proc() -> GlyphIndex ---
+        destroyGlyphIndex :: proc(glyph: GlyphIndex) ---
+        /// Outputs the glyph index corresponding to the specified Unicode character.
+        getGlyphIndex :: proc(glyphIndex: GlyphIndex, font: FontHandle, unicode: unicode_t) -> bool ---
+        getGlyphIndexIndex :: proc(glyphIndex: GlyphIndex) -> u32 ---
+        /// Loads the geometry of a glyph from a font file.
+        loadGlyph :: proc(output: Shape, font: FontHandle, glyphIndex: GlyphIndex, coordinateScaling: FontCoordinateScaling, advance: ^c.double = nil) -> bool ---
+        loadGlyph_unicode :: proc(output: Shape, font: FontHandle, unicode: unicode_t, coordinateScaling: FontCoordinateScaling, advance: ^c.double = nil) -> bool ---
+        /// Outputs the kerning distance adjustment between two specific glyphs.
+        getKerning :: proc(output: ^c.double, font: FontHandle, glyphIndex1: GlyphIndex, glyphIndex2: GlyphIndex, coordinateScaling: FontCoordinateScaling) -> bool ---
+        getKerning_unicode :: proc(output: ^c.double, font: FontHandle, unicode1: unicode_t, unicode2: unicode_t, coordinateScaling: FontCoordinateScaling) -> bool ---
+    }
 }
 
