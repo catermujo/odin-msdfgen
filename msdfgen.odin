@@ -6,11 +6,9 @@ MSDFGEN_LINK :: #config(MSDFGEN_LINK, "shared")
 
 when ODIN_OS == .Windows {
     when MSDFGEN_LINK == "static" {
-        foreign import msdfgen "core.lib"
-        foreign import msdfext "ext.lib"
+        foreign import msdf "msdf.lib"
     } else {
-        foreign import msdfgen "core_shared.lib"
-        foreign import msdfext "ext_shared.lib"
+        foreign import msdf "msdf_shared.lib"
     }
 } else {
     when ODIN_OS == .Linux || ODIN_OS == .Darwin {
@@ -18,19 +16,15 @@ when ODIN_OS == .Windows {
     }
     when ODIN_OS == .Darwin {
         when MSDFGEN_LINK == "static" {
-            foreign import msdfgen "core.darwin.a"
-            foreign import msdfext "ext.darwin.a"
+            foreign import msdf "msdf.darwin.a"
         } else {
-            foreign import msdfgen "core.dylib"
-            foreign import msdfext "ext.dylib"
+            foreign import msdf "msdf.dylib"
         }
     } else when ODIN_OS == .Linux {
         when MSDFGEN_LINK == "static" {
-            foreign import msdfgen "core.linux.a"
-            foreign import msdfext "ext.linux.a"
+            foreign import msdf "msdf.linux.a"
         } else {
-            foreign import msdfgen "core.so"
-            foreign import msdfext "ext.so"
+            foreign import msdf "msdf.so"
         }
     }
 }
@@ -188,7 +182,7 @@ when ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 {
     }
 } else {
     @(default_calling_convention = "c", link_prefix = "msdfgen_")
-    foreign msdfgen {
+    foreign msdf {
         generateSDF :: proc(#by_ptr output: BitmapRef(c.float, 1), shape: Shape, #by_ptr transformation: SDFTransformation, #by_ptr config: GeneratorConfig = Default_GeneratorConfig) ---
 
         /// Generates a single-channel signed pseudo-distance field.
@@ -352,7 +346,7 @@ when ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 {
     }
 } else {
     @(default_calling_convention = "c", link_prefix = "msdfgen_")
-    foreign msdfext {
+    foreign msdf {
 
         // resolve-shape-geometry.h
         /// Resolves any intersections within the shape by subdividing its contours using the Skia library and makes sure its contours have a consistent winding.

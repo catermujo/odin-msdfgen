@@ -23,18 +23,17 @@ fi
 echo "Building project..."
 emmake make -C $BIN -j$NCORE
 cp "$BIN"/msdfgen-config.h .
-# cp "$BIN"/*."$DLL_EXT" ..
-for f in "$BIN/"vcpkg_installed/**; do
-    [ -d "$f/lib" ] && VCPKG_LIB="$SRC/$f"
-done
 popd
 
-STATIC_DEPS=(libbrotlicommon.a libbrotlidec.a libbz2.a libfreetype.a libpng16.a libtinyxml2.a libz.a libskia.a)
-STATIC_DEPS=("${STATIC_DEPS[@]/#/$VCPKG_LIB/lib/}")
+echo "Building static lib..."
+em++ -c msdfgen-c/msdfgen-core.cpp -I. -I"$SRC" -o core.wasm.o
+em++ -c msdfgen-c/msdfgen-ext.cpp -I. -I"$SRC" -o ext.wasm.o
 
-echo "Building static libs..."
-em++ -c msdfgen-c/msdfgen-core.cpp -I. -I"$SRC" -ocore.wasm.o
-# libtool -static -o core."$LIB_EXT".a "$SRC/$BIN/libmsdfgen-core.a" core.o
-
-em++ -c msdfgen-c/msdfgen-ext.cpp -I. -I"$SRC" -oext.wasm.o
-# libtool -static -o ext."$LIB_EXT".a "$SRC/$BIN/libmsdfgen-ext.a" "${STATIC_DEPS[@]}" ext.o
+# Extract .o files from archives and combine into single archive
+TMPDIR=$(mktemp -d)
+pushd "$TMPDIR"
+emar x "$OLDPWD/$SRC/$BIN/libmsdfgen-core.a"
+emar x "$OLDPWD/$SRC/$BIN/libmsdfgen-ext.a"
+popd
+emar rcs msdf.wasm.a "$TMPDIR"/*.o core.wasm.o ext.wasm.o
+rm -rf "$TMPDIR" core.wasm.o ext.wasm.o
