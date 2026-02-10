@@ -3,7 +3,12 @@
 set -ex
 
 SRC="msdfgen"
-[ -d "$SRC" ] || git clone https://github.com/Chlumsky/msdfgen "$SRC" --depth=1
+[ -d "$SRC" ] || git clone --revision 1874bcf7d9624ccc85b4bc9a85d78116f690f35b https://github.com/Chlumsky/msdfgen "$SRC" --depth=1
+
+# Apply local patches (safe to run repeatedly)
+for patch in patches/*.patch; do
+    [ -f "$patch" ] && git -C "$SRC" am --3way "$PWD/$patch" 2>/dev/null || true
+done
 
 pushd "$SRC"
 BIN="build"

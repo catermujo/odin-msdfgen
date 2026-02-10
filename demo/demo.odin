@@ -4,17 +4,17 @@ import msdfgen "../"
 
 main :: proc() {
     ft := msdfgen.initializeFreetype()
-    assert(ft != nil)
+    assert(ft != nil,"expected condition: ft != nil")
     defer msdfgen.deinitializeFreetype(ft)
 
     font := msdfgen.loadFont(ft, "LiberationMono.ttf")
-    assert(font != nil)
+    assert(font != nil,"expected condition: font != nil")
     defer msdfgen.destroyFont(font)
 
     shape := msdfgen.createShape()
     defer msdfgen.destroyShape(shape)
 
-    assert(msdfgen.loadGlyph(shape, font, 'A', .em_normalized))
+    assert(msdfgen.loadGlyph(shape, font, 'A', .em_normalized),"expected condition: msdfgen.loadGlyph(shape, font, 'A', .em_normalized)")
     msdfgen.normalizeShape(shape)
 
     msdfgen.edgeColoringSimple(shape, 3)

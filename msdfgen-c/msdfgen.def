@@ -1,0 +1,57 @@
+EXPORTS
+    msdfgen_GeneratorConfig_default DATA
+    msdfgen_ErrorCorrectionConfig_default DATA
+    msdfgen_MSDFGeneratorConfig_default DATA
+    msdfgen_generateSDF
+    msdfgen_generatePSDF
+    msdfgen_generateMSDF
+    msdfgen_generateMTSDF
+    msdfgen_generateSDF_legacy
+    msdfgen_generatePSDF_legacy
+    msdfgen_generatePseudoSDF_legacy
+    msdfgen_generateMSDF_legacy
+    msdfgen_generateMTSDF_legacy
+    msdfgen_createShape
+    msdfgen_destroyShape
+    msdfgen_normalizeShape
+    msdfgen_setShapeInverseYAxis
+    msdfgen_getShapeBounds
+    msdfgen_shapeOrientContours
+    msdfgen_shapeBoundMiters
+    msdfgen_shapeValidate
+    msdfgen_edgeColoringSimple
+    msdfgen_edgeColoringInkTrap
+    msdfgen_edgeColoringByDistance
+    msdfgen_resolveShapeGeometry
+    msdfgen_savePng_r8
+    msdfgen_savePng_rgb8
+    msdfgen_savePng_rgba8
+    msdfgen_savePng_r
+    msdfgen_savePng_rgb
+    msdfgen_savePng_rgba
+    msdfgen_SVG_IMPORT_FAILURE DATA
+    msdfgen_SVG_IMPORT_SUCCESS_FLAG DATA
+    msdfgen_SVG_IMPORT_PARTIAL_FAILURE_FLAG DATA
+    msdfgen_SVG_IMPORT_INCOMPLETE_FLAG DATA
+    msdfgen_SVG_IMPORT_UNSUPPORTED_FEATURE_FLAG DATA
+    msdfgen_SVG_IMPORT_TRANSFORMATION_IGNORED_FLAG DATA
+    msdfgen_buildShapeFromSvgPath
+    msdfgen_loadSvgShape
+    msdfgen_loadSvgShape_skia
+    msdfgen_initializeFreetype
+    msdfgen_deinitializeFreetype
+    msdfgen_loadFont
+    msdfgen_loadFontData
+    msdfgen_adoptFreetypeFont
+    msdfgen_destroyFont
+    msdfgen_getFontMetrics
+    msdfgen_getFontWhitespaceWidth
+    msdfgen_getGlyphCount
+    msdfgen_createGlyphIndex
+    msdfgen_destroyGlyphIndex
+    msdfgen_getGlyphIndex
+    msdfgen_getGlyphIndexIndex
+    msdfgen_loadGlyph
+    msdfgen_loadGlyph_unicode
+    msdfgen_getKerning
+    msdfgen_getKerning_unicode

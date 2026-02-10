@@ -2,10 +2,10 @@ package msdfgen
 
 import "core:c"
 
-MSDFGEN_LINK :: #config(MSDFGEN_LINK, "shared")
+LINK :: #config(MSDFGEN_LINK, "shared")
 
 when ODIN_OS == .Windows {
-    when MSDFGEN_LINK == "static" {
+    when LINK == "static" {
         foreign import msdf "msdf.lib"
     } else {
         foreign import msdf "msdf_shared.lib"
@@ -15,13 +15,13 @@ when ODIN_OS == .Windows {
         @(require) foreign import stdcpp "system:c++"
     }
     when ODIN_OS == .Darwin {
-        when MSDFGEN_LINK == "static" {
+        when LINK == "static" {
             foreign import msdf "msdf.darwin.a"
         } else {
             foreign import msdf "msdf.dylib"
         }
     } else when ODIN_OS == .Linux {
-        when MSDFGEN_LINK == "static" {
+        when LINK == "static" {
             foreign import msdf "msdf.linux.a"
         } else {
             foreign import msdf "msdf.so"
