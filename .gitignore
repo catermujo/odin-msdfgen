@@ -1,1 +1,3 @@
 /msdfgen
+# DUMBAI: Keep the generated Windows static archive local because it exceeds our practical Git file limits.
+/msdf.lib

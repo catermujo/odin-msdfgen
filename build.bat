@@ -2,6 +2,11 @@
 
 setlocal EnableDelayedExpansion
 
+call :ensure_msvc || exit /b 1
+
+REM DUMBAI: Reuse the same Visual Studio environment for both vcpkg resolution and the later cl/lib steps.
+if not defined VCPKG_ROOT if defined VSINSTALLDIR if exist "%VSINSTALLDIR%VC\vcpkg" set "VCPKG_ROOT=%VSINSTALLDIR%VC\vcpkg"
+
 set SRC=msdfgen
 if not exist "%SRC%" (
     git clone --revision 1874bcf7d9624ccc85b4bc9a85d78116f690f35b https://github.com/Chlumsky/msdfgen "%SRC%" --depth=1 || exit /b 1
@@ -65,6 +70,24 @@ if exist ext.obj del ext.obj
 
 echo Build completed successfully!
 exit /b 0
+
+:ensure_msvc
+where cl >nul 2>nul
+if not errorlevel 1 goto :eof
+
+REM DUMBAI: Bootstrap the MSVC environment so vcpkg and the wrapper compile/link steps agree on the active toolchain.
+set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
+if not exist "%VSWHERE%" (
+    echo ERROR: Could not find vswhere.exe.
+    exit /b 1
+)
+for /f "usebackq delims=" %%I in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VSINSTALL=%%I"
+if not defined VSINSTALL (
+    echo ERROR: Could not find a Visual Studio installation with MSVC tools.
+    exit /b 1
+)
+call "%VSINSTALL%\VC\Auxiliary\Build\vcvarsall.bat" x64 >nul || exit /b 1
+goto :eof
 
 :ensure_vcpkg_baseline
 findstr /C:"\"builtin-baseline\"" "vcpkg.json" >nul
