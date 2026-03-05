@@ -19,7 +19,7 @@ if exist "vcpkg.json" (
 )
 
 set BIN=build
-cmake . -B "%BIN%" -A x64 -DCMAKE_BUILD_TYPE=Release -DMSDFGEN_INSTALL=ON || exit /b 1
+cmake . -B "%BIN%" -A x64 -DCMAKE_BUILD_TYPE=Release -DMSDFGEN_INSTALL=ON -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded || exit /b 1
 
 set NCORE=%NUMBER_OF_PROCESSORS%
 set DLL_EXT=dll
@@ -46,7 +46,7 @@ set ALL_LIBS="%SRC%\%BIN%\Release\msdfgen-core.lib" "%SRC%\%BIN%\Release\msdfgen
 for %%f in (%STATIC_DEPS%) do (
     set ALL_LIBS=!ALL_LIBS! "%VCPKG_LIB%\lib\%%f"
 )
-cl /LD /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-core.cpp msdfgen-c\msdfgen-ext.cpp !ALL_LIBS! /Fe:msdf.%DLL_EXT% /link /IMPLIB:msdf_shared.lib /DEF:msdfgen-c\msdfgen.def || exit /b 1
+cl /LD /MT /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-core.cpp msdfgen-c\msdfgen-ext.cpp !ALL_LIBS! /Fe:msdf.%DLL_EXT% /link /IMPLIB:msdf_shared.lib /DEF:msdfgen-c\msdfgen.def || exit /b 1
 if exist msdfgen-core.obj del msdfgen-core.obj
 if exist msdfgen-ext.obj del msdfgen-ext.obj
 if exist msdf.exp del msdf.exp
@@ -57,8 +57,8 @@ set ALL_STATIC_LIBS="%SRC%\%BIN%\Release\msdfgen-core.lib" "%SRC%\%BIN%\Release\
 for %%f in (%STATIC_DEPS%) do (
     set ALL_STATIC_LIBS=!ALL_STATIC_LIBS! "%VCPKG_LIB%\lib\%%f"
 )
-cl /c /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-core.cpp /Fo:core.obj || exit /b 1
-cl /c /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-ext.cpp /Fo:ext.obj || exit /b 1
+cl /c /MT /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-core.cpp /Fo:core.obj || exit /b 1
+cl /c /MT /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-ext.cpp /Fo:ext.obj || exit /b 1
 lib /OUT:msdf.lib !ALL_STATIC_LIBS! core.obj ext.obj || exit /b 1
 if exist core.obj del core.obj
 if exist ext.obj del ext.obj
