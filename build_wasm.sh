@@ -3,7 +3,23 @@
 set -ex
 
 SRC="msdfgen"
-[ -d "$SRC" ] || git clone --revision 1874bcf7d9624ccc85b4bc9a85d78116f690f35b https://github.com/Chlumsky/msdfgen "$SRC" --depth=1
+clone_at_revision() {
+    local dir="$1"
+    local revision="$2"
+    local remote="$3"
+    shift 3
+    [ -d "$dir" ] && return
+    git clone "$@" "$remote" "$dir"
+    if ! git -C "$dir" checkout --detach "$revision"; then
+        git -C "$dir" fetch origin "$revision"
+        git -C "$dir" checkout --detach FETCH_HEAD
+    fi
+    if [ -f "$dir/.gitmodules" ]; then
+        git -C "$dir" submodule update --init --recursive
+    fi
+}
+
+clone_at_revision "$SRC" 1874bcf7d9624ccc85b4bc9a85d78116f690f35b https://github.com/Chlumsky/msdfgen --depth=1
 
 # Apply local patches (safe to run repeatedly)
 for patch in patches/*.patch; do
