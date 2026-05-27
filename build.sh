@@ -21,6 +21,14 @@ clone_at_revision() {
 
 clone_at_revision "$SRC" 1874bcf7d9624ccc85b4bc9a85d78116f690f35b https://github.com/Chlumsky/msdfgen --depth=1
 
+linux_arch_dir() {
+    case "$(uname -m)" in
+        x86_64 | amd64) echo "linux_x64" ;;
+        aarch64 | arm64) echo "linux_arm64" ;;
+        *) echo "linux_$(uname -m)" ;;
+    esac
+}
+
 # Apply local patches (safe to run repeatedly)
 for patch in patches/*.patch; do
     [ -f "$patch" ] && git -C "$SRC" am --3way "$PWD/$patch" 2>/dev/null || true
@@ -34,10 +42,16 @@ if [ $(uname -s) = 'Darwin' ]; then
     NCORE=$(sysctl -n hw.ncpu)
     LIB_EXT=darwin
     DLL_EXT=dylib
+    SHARED_OUT="msdf.$DLL_EXT"
+    STATIC_OUT="msdf.$LIB_EXT.a"
 else
     NCORE=$(nproc)
     LIB_EXT=linux
     DLL_EXT=so
+    ARCH_DIR=$(linux_arch_dir)
+    mkdir -p "$ARCH_DIR"
+    SHARED_OUT="$ARCH_DIR/msdf.$DLL_EXT"
+    STATIC_OUT="$ARCH_DIR/msdf.$LIB_EXT.a"
 fi
 
 echo "Building project..."
@@ -55,10 +69,10 @@ STATIC_DEPS=("${STATIC_DEPS[@]/#/$VCPKG_LIB/lib/}")
 echo "Building shared lib..."
 clang++ msdfgen-c/msdfgen-core.cpp msdfgen-c/msdfgen-ext.cpp -I. \
     "$SRC/$BIN/libmsdfgen-core.a" "$SRC/$BIN/libmsdfgen-ext.a" "${STATIC_DEPS[@]}" \
-    -shared -fPIC -o msdf."$DLL_EXT"
+    -shared -fPIC -o "$SHARED_OUT"
 
 echo "Building static lib..."
 clang++ -c msdfgen-c/msdfgen-core.cpp -I. -I"$SRC" -o core.o
 clang++ -c msdfgen-c/msdfgen-ext.cpp -I. -I"$SRC" -o ext.o
-libtool -static -o msdf."$LIB_EXT".a "$SRC/$BIN/libmsdfgen-core.a" "$SRC/$BIN/libmsdfgen-ext.a" "${STATIC_DEPS[@]}" core.o ext.o
+libtool -static -o "$STATIC_OUT" "$SRC/$BIN/libmsdfgen-core.a" "$SRC/$BIN/libmsdfgen-ext.a" "${STATIC_DEPS[@]}" core.o ext.o
 rm core.o ext.o

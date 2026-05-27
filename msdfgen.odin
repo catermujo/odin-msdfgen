@@ -22,9 +22,21 @@ when ODIN_OS == .Windows {
         }
     } else when ODIN_OS == .Linux {
         when LINK == "static" {
-            foreign import msdf "msdf.linux.a"
+            when ODIN_ARCH == .amd64 {
+                foreign import msdf "linux_x64/msdf.linux.a"
+            } else when ODIN_ARCH == .arm64 {
+                foreign import msdf "linux_arm64/msdf.linux.a"
+            } else {
+                #panic("vendor/msdf static link supports only linux amd64/arm64")
+            }
         } else {
-            foreign import msdf "msdf.so"
+            when ODIN_ARCH == .amd64 {
+                foreign import msdf "linux_x64/msdf.so"
+            } else when ODIN_ARCH == .arm64 {
+                foreign import msdf "linux_arm64/msdf.so"
+            } else {
+                #panic("vendor/msdf shared link supports only linux amd64/arm64")
+            }
         }
     }
 }
@@ -411,4 +423,3 @@ when ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 {
         getKerning_unicode :: proc(output: ^c.double, font: FontHandle, unicode1: unicode_t, unicode2: unicode_t, coordinateScaling: FontCoordinateScaling) -> bool ---
     }
 }
-
