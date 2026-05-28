@@ -85,5 +85,10 @@ clang++ msdfgen-c/msdfgen-core.cpp msdfgen-c/msdfgen-ext.cpp -I. \
 echo "Building static lib..."
 clang++ -c msdfgen-c/msdfgen-core.cpp -I. -I"$SRC" -o core.o
 clang++ -c msdfgen-c/msdfgen-ext.cpp -I. -I"$SRC" -o ext.o
-libtool -static -o "$STATIC_OUT" "$SRC/$BIN/libmsdfgen-core.a" "$SRC/$BIN/libmsdfgen-ext.a" "${STATIC_DEPS[@]}" core.o ext.o
+if [ "$(uname -s)" = 'Darwin' ]; then
+    libtool -static -o "$STATIC_OUT" "$SRC/$BIN/libmsdfgen-core.a" "$SRC/$BIN/libmsdfgen-ext.a" "${STATIC_DEPS[@]}" core.o ext.o
+else
+    ar rcs "$STATIC_OUT" "$SRC/$BIN/libmsdfgen-core.a" "$SRC/$BIN/libmsdfgen-ext.a" "${STATIC_DEPS[@]}" core.o ext.o
+    ranlib "$STATIC_OUT"
+fi
 rm core.o ext.o
