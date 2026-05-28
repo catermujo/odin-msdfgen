@@ -43,7 +43,34 @@ CMAKE_FLAGS=(-DMSDFGEN_INSTALL=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON)
 if [ "$(uname -s)" = 'Linux' ]; then
     CMAKE_FLAGS+=(-DMSDFGEN_USE_SKIA=OFF)
 fi
-cmake . -B "$BIN" -DCMAKE_BUILD_TYPE=Release "${CMAKE_FLAGS[@]}" #-DBUILD_SHARED_LIBS=ON
+
+CMAKE_GEN_ARGS=()
+if command -v ninja >/dev/null 2>&1; then
+    CMAKE_GEN_ARGS=(-G Ninja)
+elif command -v make >/dev/null 2>&1; then
+    CMAKE_GEN_ARGS=(-G "Unix Makefiles")
+else
+    echo "Error: neither ninja nor make was found in PATH" >&2
+    exit 1
+fi
+
+if [ -z "${CC:-}" ]; then
+    if command -v clang >/dev/null 2>&1; then
+        CMAKE_FLAGS+=(-D CMAKE_C_COMPILER=clang)
+    elif command -v gcc >/dev/null 2>&1; then
+        CMAKE_FLAGS+=(-D CMAKE_C_COMPILER=gcc)
+    fi
+fi
+
+if [ -z "${CXX:-}" ]; then
+    if command -v clang++ >/dev/null 2>&1; then
+        CMAKE_FLAGS+=(-D CMAKE_CXX_COMPILER=clang++)
+    elif command -v g++ >/dev/null 2>&1; then
+        CMAKE_FLAGS+=(-D CMAKE_CXX_COMPILER=g++)
+    fi
+fi
+
+cmake . "${CMAKE_GEN_ARGS[@]}" -B "$BIN" -DCMAKE_BUILD_TYPE=Release "${CMAKE_FLAGS[@]}" #-DBUILD_SHARED_LIBS=ON
 
 if [ $(uname -s) = 'Darwin' ]; then
     NCORE=$(sysctl -n hw.ncpu)
