@@ -2,7 +2,9 @@
 
 set -ex
 
+BASE="$(cd "$(dirname "$0")" && pwd)"
 SRC="msdfgen"
+cd "$BASE"
 clone_at_revision() {
     local dir="$1"
     local revision="$2"
@@ -47,16 +49,17 @@ if [ $(uname -s) = 'Darwin' ]; then
     NCORE=$(sysctl -n hw.ncpu)
     LIB_EXT=darwin
     DLL_EXT=dylib
-    SHARED_OUT="msdf.$DLL_EXT"
-    STATIC_OUT="msdf.$LIB_EXT.a"
+    SHARED_OUT="$BASE/msdf.$DLL_EXT"
+    STATIC_OUT="$BASE/msdf.$LIB_EXT.a"
 else
     NCORE=$(nproc)
     LIB_EXT=linux
     DLL_EXT=so
     ARCH_DIR=$(linux_arch_dir)
-    mkdir -p "$ARCH_DIR"
-    SHARED_OUT="$ARCH_DIR/msdf.$DLL_EXT"
-    STATIC_OUT="$ARCH_DIR/msdf.$LIB_EXT.a"
+    OUT_DIR="$BASE/$ARCH_DIR"
+    mkdir -p "$OUT_DIR"
+    SHARED_OUT="$OUT_DIR/msdf.$DLL_EXT"
+    STATIC_OUT="$OUT_DIR/msdf.$LIB_EXT.a"
 fi
 
 echo "Building project..."
