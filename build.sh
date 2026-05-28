@@ -36,7 +36,12 @@ done
 
 pushd "$SRC"
 BIN="build"
-cmake . -B "$BIN" -DCMAKE_BUILD_TYPE=Release -DMSDFGEN_INSTALL=ON #-DBUILD_SHARED_LIBS=ON
+
+CMAKE_FLAGS=(-DMSDFGEN_INSTALL=ON)
+if [ "$(uname -s)" = 'Linux' ]; then
+    CMAKE_FLAGS+=(-DMSDFGEN_USE_SKIA=OFF)
+fi
+cmake . -B "$BIN" -DCMAKE_BUILD_TYPE=Release "${CMAKE_FLAGS[@]}" #-DBUILD_SHARED_LIBS=ON
 
 if [ $(uname -s) = 'Darwin' ]; then
     NCORE=$(sysctl -n hw.ncpu)
@@ -63,7 +68,10 @@ for f in "$BIN/"vcpkg_installed/**; do
 done
 popd
 
-STATIC_DEPS=(libbrotlicommon.a libbrotlidec.a libbz2.a libfreetype.a libpng16.a libtinyxml2.a libz.a libskia.a)
+STATIC_DEPS=(libbrotlicommon.a libbrotlidec.a libbz2.a libfreetype.a libpng16.a libtinyxml2.a libz.a)
+if [ -f "$VCPKG_LIB/lib/libskia.a" ]; then
+    STATIC_DEPS+=(libskia.a)
+fi
 STATIC_DEPS=("${STATIC_DEPS[@]/#/$VCPKG_LIB/lib/}")
 
 echo "Building shared lib..."
