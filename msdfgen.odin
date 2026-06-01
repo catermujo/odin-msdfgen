@@ -254,7 +254,7 @@ when ODIN_ARCH == .wasm32 || ODIN_ARCH == .wasm64p32 {
 // ---Ext---
 unicode_t :: c.uint
 FreetypeHandle :: distinct rawptr
-FontHandle :: distinct rawptr
+FontHandle :: rawptr
 GlyphIndex :: distinct rawptr
 
 /// Global metrics of a typeface (in font units).
