@@ -2,6 +2,14 @@
 
 setlocal EnableDelayedExpansion
 
+set "VENDOR_WINDOWS_ARCH=%VSCMD_ARG_TGT_ARCH%"
+if not defined VENDOR_WINDOWS_ARCH set "VENDOR_WINDOWS_ARCH=%PROCESSOR_ARCHITECTURE%"
+if /I "%VENDOR_WINDOWS_ARCH%"=="AMD64" set "VENDOR_WINDOWS_ARCH=x64"
+if /I "%VENDOR_WINDOWS_ARCH%"=="ARM64" set "VENDOR_WINDOWS_ARCH=arm64"
+if /I "%VENDOR_WINDOWS_ARCH%"=="X86" set "VENDOR_WINDOWS_ARCH=x64"
+set "BASE=%~dp0"
+set output_dir=windows_%VENDOR_WINDOWS_ARCH%
+
 call :ensure_msvc || exit /b 1
 
 REM DUMBAI: Reuse the same Visual Studio environment for both vcpkg resolution and the later cl/lib steps.
@@ -24,7 +32,8 @@ if exist "vcpkg.json" (
 )
 
 set BIN=build
-cmake . -B "%BIN%" -A x64 -DCMAKE_BUILD_TYPE=Release -DMSDFGEN_INSTALL=ON -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded || exit /b 1
+if not exist "%BASE%%output_dir%" mkdir "%BASE%%output_dir%"
+cmake . -B "%BIN%" -A %VENDOR_WINDOWS_ARCH% -DCMAKE_BUILD_TYPE=Release -DMSDFGEN_INSTALL=ON -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded || exit /b 1
 
 set NCORE=%NUMBER_OF_PROCESSORS%
 set DLL_EXT=dll
@@ -33,7 +42,7 @@ echo Building project...
 cmake --build "%BIN%" --config Release -j %NCORE% || exit /b 1
 copy /y "%BIN%\msdfgen-config.h" . >nul || exit /b 1
 if exist "%BIN%\Release\*.%DLL_EXT%" (
-    copy /y "%BIN%\Release\*.%DLL_EXT%" .. >nul || exit /b 1
+    copy /y "%BIN%\Release\*.%DLL_EXT%" "%BASE%%output_dir%" >nul || exit /b 1
 ) else (
     REM msdfgen's default Windows config often produces static libs only.
     REM We still produce msdf.dll below from the wrapper sources.
@@ -41,7 +50,7 @@ if exist "%BIN%\Release\*.%DLL_EXT%" (
 )
 popd || exit /b 1
 
-set VCPKG_LIB=%SRC%\%BIN%\vcpkg_installed\x64-windows-static
+set VCPKG_LIB=%SRC%\%BIN%\vcpkg_installed\%VENDOR_WINDOWS_ARCH%-windows-static
 
 REM Static dependencies for linking
 set STATIC_DEPS=brotlicommon.lib brotlidec.lib bz2.lib freetype.lib libpng16.lib tinyxml2.lib zlib.lib skia.lib
@@ -51,7 +60,7 @@ set ALL_LIBS="%SRC%\%BIN%\Release\msdfgen-core.lib" "%SRC%\%BIN%\Release\msdfgen
 for %%f in (%STATIC_DEPS%) do (
     set ALL_LIBS=!ALL_LIBS! "%VCPKG_LIB%\lib\%%f"
 )
-cl /LD /MT /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-core.cpp msdfgen-c\msdfgen-ext.cpp !ALL_LIBS! /Fe:msdf.%DLL_EXT% /link /IMPLIB:msdf_shared.lib /DEF:msdfgen-c\msdfgen.def || exit /b 1
+cl /LD /MT /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-core.cpp msdfgen-c\msdfgen-ext.cpp !ALL_LIBS! /Fe:"%BASE%%output_dir%\msdf.%DLL_EXT%" /link /IMPLIB:"%BASE%%output_dir%\msdf_shared.lib" /DEF:msdfgen-c\msdfgen.def || exit /b 1
 if exist msdfgen-core.obj del msdfgen-core.obj
 if exist msdfgen-ext.obj del msdfgen-ext.obj
 if exist msdf.exp del msdf.exp
@@ -64,7 +73,7 @@ for %%f in (%STATIC_DEPS%) do (
 )
 cl /c /MT /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-core.cpp /Fo:core.obj || exit /b 1
 cl /c /MT /EHsc /O2 /I. /I"%SRC%" msdfgen-c\msdfgen-ext.cpp /Fo:ext.obj || exit /b 1
-lib /OUT:msdf.lib !ALL_STATIC_LIBS! core.obj ext.obj || exit /b 1
+lib /OUT:"%BASE%%output_dir%\msdf.lib" !ALL_STATIC_LIBS! core.obj ext.obj || exit /b 1
 if exist core.obj del core.obj
 if exist ext.obj del ext.obj
 
@@ -86,7 +95,7 @@ if not defined VSINSTALL (
     echo ERROR: Could not find a Visual Studio installation with MSVC tools.
     exit /b 1
 )
-call "%VSINSTALL%\VC\Auxiliary\Build\vcvarsall.bat" x64 >nul || exit /b 1
+call "%VSINSTALL%\VC\Auxiliary\Build\vcvarsall.bat" %VENDOR_WINDOWS_ARCH% >nul || exit /b 1
 goto :eof
 
 :ensure_vcpkg_baseline

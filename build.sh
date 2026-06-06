@@ -31,6 +31,14 @@ linux_arch_dir() {
     esac
 }
 
+darwin_arch_dir() {
+    case "$(uname -m)" in
+        x86_64 | amd64) echo "darwin_x64" ;;
+        aarch64 | arm64) echo "darwin_arm64" ;;
+        *) echo "darwin_$(uname -m)" ;;
+    esac
+}
+
 # Apply local patches (safe to run repeatedly)
 for patch in patches/*.patch; do
     [ -f "$patch" ] && git -C "$SRC" am --3way "$PWD/$patch" 2>/dev/null || true
@@ -76,8 +84,11 @@ if [ $(uname -s) = 'Darwin' ]; then
     NCORE=$(sysctl -n hw.ncpu)
     LIB_EXT=darwin
     DLL_EXT=dylib
-    SHARED_OUT="$BASE/msdf.$DLL_EXT"
-    STATIC_OUT="$BASE/msdf.$LIB_EXT.a"
+    ARCH_DIR=$(darwin_arch_dir)
+    OUT_DIR="$BASE/$ARCH_DIR"
+    mkdir -p "$OUT_DIR"
+    SHARED_OUT="$OUT_DIR/msdf.$DLL_EXT"
+    STATIC_OUT="$OUT_DIR/msdf.$LIB_EXT.a"
 else
     NCORE=$(nproc)
     LIB_EXT=linux

@@ -5,10 +5,20 @@ import "core:c"
 LINK :: #config(MSDFGEN_LINK, "shared")
 
 when ODIN_OS == .Windows {
-    when LINK == "static" {
-        foreign import msdf "msdf.lib"
+    when ODIN_ARCH == .amd64 {
+        when LINK == "static" {
+            foreign import msdf "windows_x64/msdf.lib"
+        } else {
+            foreign import msdf "windows_x64/msdf_shared.lib"
+        }
+    } else when ODIN_ARCH == .arm64 {
+        when LINK == "static" {
+            foreign import msdf "windows_arm64/msdf.lib"
+        } else {
+            foreign import msdf "windows_arm64/msdf_shared.lib"
+        }
     } else {
-        foreign import msdf "msdf_shared.lib"
+        #panic("vendor/msdf supports windows amd64/arm64 only")
     }
 } else {
     when ODIN_OS == .Linux {
@@ -17,10 +27,20 @@ when ODIN_OS == .Windows {
         @(require) foreign import stdcpp "system:c++"
     }
     when ODIN_OS == .Darwin {
-        when LINK == "static" {
-            foreign import msdf "msdf.darwin.a"
+        when ODIN_ARCH == .amd64 {
+            when LINK == "static" {
+                foreign import msdf "darwin_x64/msdf.darwin.a"
+            } else {
+                foreign import msdf "darwin_x64/msdf.dylib"
+            }
+        } else when ODIN_ARCH == .arm64 {
+            when LINK == "static" {
+                foreign import msdf "darwin_arm64/msdf.darwin.a"
+            } else {
+                foreign import msdf "darwin_arm64/msdf.dylib"
+            }
         } else {
-            foreign import msdf "msdf.dylib"
+            #panic("vendor/msdf supports Darwin amd64/arm64 only")
         }
     } else when ODIN_OS == .Linux {
         when LINK == "static" {
